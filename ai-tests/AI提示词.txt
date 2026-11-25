@@ -1,0 +1,19 @@
+你是一名软件测试工程师。请为下面这个本地"学生管理系统"的接口设计黑盒测试用例，我将用 Postman 逐条执行。
+
+【系统基本信息】
+- 基地址：http://127.0.0.1:8080（仅本机访问）
+- 除"健康检查"和"登录"外，所有接口都需要请求头 Authorization: Bearer <token>，token 通过登录接口获取
+- 演示账号：admin/admin123（全部权限）、teacher/teacher123（查询、新增、修改）、viewer/viewer123（仅查询）
+
+【接口清单】
+1. GET /api/health 健康检查，无需登录
+2. POST /api/auth/login 登录，请求体 {"username":"","password":""}，成功返回 200 和 token
+3. GET /api/students?keyword=&page=1&page_size=10 学生列表，支持关键字搜索和分页，返回 data 列表和 pagination 分页信息
+4. POST /api/students 新增学生，请求体 {"student_no":"","name":"","gender":"","age":20,"major":"","phone":""}，六个字段全部必填；学号全局唯一；年龄必须是 1 到 150 之间的整数；成功返回 201
+5. GET /api/students/{id} 按 ID 查询学生
+6. PUT /api/students/{id} 修改学生，请求体字段同新增
+7. DELETE /api/students/{id} 删除学生
+8. POST /api/students/batch 批量导入，请求体 {"students":[{...}]}，数量 1 到 100 条，任意一条校验失败或学号重复时整体回滚
+
+【请输出】
+针对"登录、新增学生、学生列表搜索分页、批量导入"设计测试用例。每条用例包含：用例编号、测试接口、测试场景说明、请求数据（JSON 或查询参数）、预期 HTTP 状态码、预期业务结果。测试场景请覆盖：正常数据、空参数、非法参数、边界值、重复学号、未登录访问、越权访问。
