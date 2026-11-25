@@ -1,0 +1,7 @@
+﻿# Copy this file to config.ini and enter your local MySQL account.
+# Environment variables STUDENT_DB_HOST / PORT / USER / PASSWORD / NAME override these values.
+host=127.0.0.1
+port=3306
+user=root
+password=填写你的本机MySQL密码
+database=student_management

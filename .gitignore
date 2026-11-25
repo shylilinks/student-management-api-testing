@@ -1,0 +1,10 @@
+﻿config.ini
+*.exe
+*.pdb
+*.ilk
+*.obj
+*.ipch
+.vs/
+x64/
+__pycache__/
+.idea/

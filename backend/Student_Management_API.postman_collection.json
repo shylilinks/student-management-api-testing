@@ -1,0 +1,93 @@
+{
+  "info": {
+    "_postman_id": "8be242b4-1e4a-46ee-a30d-a2502bb3aa33",
+    "name": "学生管理系统 API（本地，含权限与事务）",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8080" },
+    { "key": "authToken", "value": "" },
+    { "key": "studentId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "健康检查（无需登录）",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/health" }
+    },
+    {
+      "name": "管理员登录",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "const body = pm.response.json();",
+        "pm.test('登录成功', () => pm.response.to.have.status(200));",
+        "if (body.success) pm.collectionVariables.set('authToken', body.data.token);"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}" },
+        "url": "{{baseUrl}}/api/auth/login"
+      }
+    },
+    {
+      "name": "当前登录用户",
+      "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/api/auth/me" }
+    },
+    {
+      "name": "搜索与分页",
+      "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/api/students?keyword=张&page=1&page_size=5" }
+    },
+    {
+      "name": "新增学生",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "const body = pm.response.json();",
+        "pm.test('新增返回 201', () => pm.response.to.have.status(201));",
+        "if (body.success) pm.collectionVariables.set('studentId', body.data.id);"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"student_no\": \"SM{{$timestamp}}\",\n  \"name\": \"张小明\",\n  \"gender\": \"男\",\n  \"age\": 20,\n  \"major\": \"计算机科学与技术\",\n  \"phone\": \"13800000000\"\n}" },
+        "url": "{{baseUrl}}/api/students"
+      }
+    },
+    {
+      "name": "按 ID 查询",
+      "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/api/students/{{studentId}}" }
+    },
+    {
+      "name": "修改学生",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"student_no\": \"SM{{$timestamp}}\",\n  \"name\": \"张小明（已修改）\",\n  \"gender\": \"男\",\n  \"age\": 21,\n  \"major\": \"软件工程\",\n  \"phone\": \"13900000000\"\n}" },
+        "url": "{{baseUrl}}/api/students/{{studentId}}"
+      }
+    },
+    {
+      "name": "批量导入成功（仅管理员）",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"students\": [\n    {\"student_no\": \"B{{$timestamp}}01\", \"name\": \"批量学生一\", \"gender\": \"女\", \"age\": 19, \"major\": \"软件工程\", \"phone\": \"13600000001\"},\n    {\"student_no\": \"B{{$timestamp}}02\", \"name\": \"批量学生二\", \"gender\": \"男\", \"age\": 20, \"major\": \"网络工程\", \"phone\": \"13600000002\"}\n  ]\n}" },
+        "url": "{{baseUrl}}/api/students/batch"
+      }
+    },
+    {
+      "name": "批量导入回滚（重复学号，应为 409）",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"students\": [\n    {\"student_no\": \"ROLLBACK001\", \"name\": \"第一条\", \"gender\": \"男\", \"age\": 20, \"major\": \"软件测试\", \"phone\": \"13700000001\"},\n    {\"student_no\": \"ROLLBACK001\", \"name\": \"重复学号\", \"gender\": \"女\", \"age\": 20, \"major\": \"软件测试\", \"phone\": \"13700000002\"}\n  ]\n}" },
+        "url": "{{baseUrl}}/api/students/batch"
+      }
+    },
+    {
+      "name": "删除学生（仅管理员）",
+      "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/api/students/{{studentId}}" }
+    },
+    {
+      "name": "退出登录",
+      "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/api/auth/logout" }
+    }
+  ]
+}
